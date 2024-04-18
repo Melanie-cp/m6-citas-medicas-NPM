@@ -1,48 +1,41 @@
-import chalk from 'chalk';
-import { v4 as uuidv4 } from 'uuid';
-import { nanoid } from 'nanoid'
-import moment from 'moment';
+// import chalk from 'chalk';
 import _ from "lodash";
+import moment from 'moment';
+import { nanoid } from 'nanoid'
+import express from 'express';
 import axios from 'axios';
 
+const app = express()
 
-// console.log(chalk.blue('Hello world!'));
+const users = []
 
-// const id1 = uuidv4()
-// const id2 = nanoid()
-// const id3 = uuidv4()
+app.get('/', async (req, res) => {
+    const response = await axios.get('https://randomuser.me/api/')
+    // console.log(response.data)
+    const gender = response.data.results[0].gender
+    const first = response.data.results[0].name.first
+    const last = response.data.results[0].name.last
 
-// console.log(chalk.green(id1));
-// console.log(chalk.red(id2));
-// console.log(chalk.bgYellow(id3));
-
-// moment.locale('es'); //configurarlo a español
-// console.log(moment().format('LLL'))
-// console.log(moment().format('llll'))
-
-//lodash
-// const numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-// const maximo = _.max(numeros) //devuelve el numero mas grande
-// console.log(maximo)
-//divide en dos arrays los pares y los impares
-// const numeros = [1, 2, 3, 4, 5, 6]
-// console.log(_.partition(numeros, (n) => n % 2))
-
-// axios
-const obtenerInformacion = async () => {
-    // const response = await fetch('https://jsonplaceholder.typicode.com/todos/1')
-    // const data = await response.json()
-    // console.log(data)
-
-    try {
-        const response = await axios.get('https://rickandmortyapi.com/api/character/1')
-        console.log(response.data.name, response.data.species)
-    } catch (error) {
-        console.log(error.message)
-        console.log(error.response.status)
-        console.log(error.response.statusText)
+    const user = {
+        gender,
+        first,
+        last,
+        id: nanoid(),
+        timestamp: moment().format('LLL')
     }
 
-}
-obtenerInformacion()
+    users.push(user)
+
+    const newUsers = _.partition(users, (item) => item.gender === 'female')
+    const female = users.filter(item => item.gender === 'female')
+    const male = users.filter(item => item.gender === 'male')
+
+    res.json({
+        female, male
+    })
+})
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+    console.log(`Servidor encendido http://localhost:${PORT}`)
+})
