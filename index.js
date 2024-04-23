@@ -4,8 +4,13 @@ import moment from 'moment';
 import { nanoid } from 'nanoid'
 import express from 'express';
 import axios from 'axios';
+import { engine } from 'express-handlebars';
 
 const app = express()
+
+app.engine('.hbs', engine({ extname: '.hbs' }));
+app.set('view engine', '.hbs');
+app.set('views', './views');
 
 const users = []
 
@@ -16,6 +21,7 @@ app.get('/', async (req, res) => {
     const first = response.data.results[0].name.first
     const last = response.data.results[0].name.last
 
+    moment.locale('es')
     const user = {
         gender,
         first,
@@ -27,13 +33,11 @@ app.get('/', async (req, res) => {
     users.push(user)
 
     const newUsers = _.partition(users, (item) => item.gender === 'female')
-    const female = users.filter(item => item.gender === 'female')
-    const male = users.filter(item => item.gender === 'male')
 
-    res.json({
-        female, male
-    })
+
+    res.render('users', { users: newUsers })
 })
+
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
