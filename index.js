@@ -1,4 +1,4 @@
-// import chalk from 'chalk';
+import chalk from 'chalk';
 import _ from "lodash";
 import moment from 'moment';
 import { nanoid } from 'nanoid'
@@ -16,7 +16,6 @@ const users = []
 
 app.get('/', async (req, res) => {
     const response = await axios.get('https://randomuser.me/api/')
-    // console.log(response.data)
     const gender = response.data.results[0].gender
     const first = response.data.results[0].name.first
     const last = response.data.results[0].name.last
@@ -34,8 +33,16 @@ app.get('/', async (req, res) => {
 
     const newUsers = _.partition(users, (item) => item.gender === 'female')
 
+    console.log(chalk.bgWhite.blue('Lista de Usuarios:'));
+    newUsers.forEach((group, index) => {
+        console.log(chalk.bgWhite.blue(`Género: ${index === 0 ? 'Femenino' : 'Masculino'}`));
+        group.forEach(user => {
+            console.log(chalk.bgWhite.blue(`Nombre: ${user.first} ${user.last} - ID: ${user.id} - Timestamp: ${user.timestamp}`));
+        });
+    });
 
     res.render('users', { users: newUsers })
+
 })
 
 
